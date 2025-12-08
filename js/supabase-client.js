@@ -41,6 +41,53 @@ class SupabaseClient {
             }
         });
     }
+    // js/supabase-client.js (ADD THESE METHODS)
+class SupabaseClient {
+  // ... existing code ...
+
+  // Call Netlify Functions
+  async callNetlifyFunction(functionName, data) {
+    try {
+      const response = await fetch(`/.netlify/functions/${functionName}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error calling ${functionName}:`, error);
+      throw error;
+    }
+  }
+
+  // Updated methods that use Netlify Functions
+  async subscribeToNewsletterWithEmail(email, name) {
+    // If we have email function, use it
+    if (window.location.hostname.includes('netlify.app')) {
+      return this.callNetlifyFunction('send-newsletter', { email, name });
+    }
+    
+    // Fallback to direct database
+    return this.subscribeToNewsletter(email);
+  }
+
+  async submitContactFormWithEmail(contactData) {
+    // If we have contact function, use it
+    if (window.location.hostname.includes('netlify.app')) {
+      return this.callNetlifyFunction('contact-form', contactData);
+    }
+    
+    // Fallback to direct database
+    return this.subscribeToNewsletter(contactData);
+  }
+}
 
     async checkSession() {
         const sessionStr = localStorage.getItem('supabase_session');
