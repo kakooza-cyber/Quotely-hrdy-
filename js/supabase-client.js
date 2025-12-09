@@ -19,9 +19,14 @@ class SupabaseClient {
             });
         }
 
-        // Initialize Supabase client
-        const supabaseUrl = 'https://YOUR_SUPABASE_PROJECT.supabase.co';
-        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+            // Get Supabase credentials from environment variables or window object
+        const supabaseUrl = this.getSupabaseUrl();
+        const supabaseKey = this.getSupabaseKey();
+        
+        if (!supabaseUrl || !supabaseKey) {
+            console.error('Supabase credentials not found. Please set environment variables.');
+            return;
+        }
         
         this.supabase = supabase.createClient(supabaseUrl, supabaseKey);
         
@@ -41,9 +46,49 @@ class SupabaseClient {
             }
         });
     }
-    // js/supabase-client.js (ADD THESE METHODS)
-class SupabaseClient {
-  // ... existing code ...
+         getSupabaseUrl() {
+        // Try different ways to get the URL:
+        // 1. From environment variables (for server-side/SSG)
+        // 2. From window object (for client-side)
+        // 3. From meta tags
+        if (typeof process !== 'undefined' && process.env?.SUPABASE_URL) {
+            return process.env.SUPABASE_URL;
+        }
+        if (window.SUPABASE_URL) {
+            return window.SUPABASE_URL;
+        }
+        
+        // Check for meta tag
+        const metaTag = document.querySelector('meta[name="supabase-url"]');
+        if (metaTag) {
+            return metaTag.getAttribute('content');
+        }
+        
+        // For Netlify Functions, use relative path
+        if (window.location.hostname.includes('netlify.app')) {
+            // You can set this via environment variable in your build settings
+            return '/.netlify/functions/get-supabase-config';
+        }
+        
+        return null;
+    }
+
+    getSupabaseKey() {
+        // Same logic for the key
+        if (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) {
+            return process.env.SUPABASE_ANON_KEY;
+        }
+        if (window.SUPABASE_ANON_KEY) {
+            return window.SUPABASE_ANON_KEY;
+        }
+        
+        const metaTag = document.querySelector('meta[name="supabase-key"]');
+        if (metaTag) {
+            return metaTag.getAttribute('content');
+        }
+        
+        return null;
+    }
 
   // Call Netlify Functions
   async callNetlifyFunction(functionName, data) {
