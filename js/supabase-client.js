@@ -33,19 +33,28 @@ class SupabaseClient {
         // Check for existing session
         await this.checkSession();
         
-        // Listen for auth changes
+                // Listen for auth changes
         this.supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN') {
                 this.user = session.user;
                 localStorage.setItem('supabase_session', JSON.stringify(session));
                 this.updateUIForLoggedInUser();
+                
+                  // redirect command!
+                if (window.location.pathname !== '/dashboard.html') {
+                    window.location.href = '/dashboard.html';
+                }
+                
             } else if (event === 'SIGNED_OUT') {
                 this.user = null;
                 localStorage.removeItem('supabase_session');
                 this.updateUIForLoggedOutUser();
+                
+                // Optional: Redirect to login page on sign out
+                // window.location.href = '/login.html'; 
             }
         });
-    }
+                    
          getSupabaseUrl() {
         // Try different ways to get the URL:
         // 1. From environment variables (for server-side/SSG)
