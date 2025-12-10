@@ -76,7 +76,7 @@ class AuthManager {
         }
     }
 
-    async handleLogin(event) {
+      async handleLogin(event) {
         event.preventDefault();
         
         const email = document.getElementById('email').value;
@@ -94,6 +94,47 @@ class AuthManager {
         }
         
         // Show loading state
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const errorElement = document.getElementById('login-error-message'); // Get the new element
+        
+        // Clear previous errors
+        if (errorElement) errorElement.textContent = ''; 
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+        submitBtn.disabled = true;
+        
+        try {
+            const result = await window.supabaseClient.signIn(email, password);
+            
+            if (result.success) {
+                // Fix 1: Removed the delayed redirect. 
+                // The redirect is now handled by the immediate onAuthStateChange listener (in supabase-client.js).
+                this.showSuccess('Login successful! Checking session...');
+                
+            } else {
+                // Fix 2: Display the exact error from Supabase if login fails
+                const errorMsg = result.error || 'Invalid credentials or unconfirmed account.';
+                if (errorElement) errorElement.textContent = `Login Failed: ${errorMsg}`;
+                
+                // You can keep this if you want the original field-specific error too, but the line above is clearer:
+                // this.showError('password', errorMsg); 
+
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            // Fix 3: Catch network/initialization failures
+            const errorMsg = 'An internal error occurred. Check if Supabase keys are correct.';
+            if (errorElement) errorElement.textContent = `CRITICAL ERROR: ${errorMsg} (${error.message})`;
+
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+    // ... (rest of the class)
+                 
+        /* Show loading state
         const submitBtn = event.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
@@ -116,7 +157,7 @@ class AuthManager {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
-    }
+    }*/
 
     async handleSignup(event) {
         event.preventDefault();
