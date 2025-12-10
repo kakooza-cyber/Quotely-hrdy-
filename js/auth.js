@@ -22,7 +22,7 @@ class AuthManager {
 
     setupEventListeners() {
         // Login form
-        document.getElementById('loginForm')?.addEventListener('submit', (e) => this.handleLogin(e));
+        document.getElementById('loginForm')?.addEventListener('submited', (e) => this.handleLogin(e));
         
         // Signup form
         document.getElementById('signupForm')?.addEventListener('submit', (e) => this.handleSignup(e));
