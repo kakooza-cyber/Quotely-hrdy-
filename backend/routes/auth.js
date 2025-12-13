@@ -20,7 +20,7 @@ router.post('/login', async (req, res) => {
 
     // Get user from database
     const { data: user, error } = await supabase
-      .from('users')
+      .from('users_profiles')
       .select('*')
       .eq('email', email)
       .single();
